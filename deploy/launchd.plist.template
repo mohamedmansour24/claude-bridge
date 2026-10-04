@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  claude-bridge — launchd TEMPLATE. NOT INSTALLED by this project.
+
+  This file is a starting point only. Review it, fill in the three REPLACE_ME
+  values, then install it yourself if you want the bridge to survive logout:
+
+    cp deploy/launchd.plist.template ~/Library/LaunchAgents/com.local.claude-bridge.plist
+    # edit it, then:
+    launchctl load  ~/Library/LaunchAgents/com.local.claude-bridge.plist
+    launchctl list | grep claude-bridge
+
+  Two things launchd gets wrong by default and this template fixes:
+
+  1. PATH. launchd gives a minimal environment, so `claude` will not be on PATH.
+     The bridge still starts: with no PATH binary and no
+     CLAUDE_BRIDGE_CLAUDE_PATH it spawns the official CLI bundled with the Agent
+     SDK, and its startup line says which one it uses. To pin the exact binary,
+     either list the directory that holds the official claude binary in PATH
+     below, or set CLAUDE_BRIDGE_CLAUDE_PATH to its absolute path.
+  2. The key. launchd has no secret store; the key below is stored in a plain
+     file you must chmod 600. Do not commit the filled-in copy anywhere.
+
+  The bridge logs structured lines to stderr. They carry request ids, counts,
+  durations, model names and outcome codes — never message text, tool arguments
+  or tool results — so the log files below stay safe to keep. (The spawned CLI's
+  own stderr is piped into the bridge and discarded, never inherited here.)
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.local.claude-bridge</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <!-- REPLACE_ME: absolute path to node (launchd has no shell to resolve it). -->
+    <string>/usr/local/bin/node</string>
+    <!-- REPLACE_ME: absolute path to this repo's dist/server.js -->
+    <string>/Users/REPLACE_ME/claude-bridge/dist/server.js</string>
+    <string>--port</string>
+    <string>8765</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <!-- REPLACE_ME: absolute path to the claude-bridge directory -->
+  <string>/Users/REPLACE_ME/claude-bridge</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <!-- REPLACE_ME: your own >= 32 character key. Keep this file mode 600. -->
+    <key>CLAUDE_BRIDGE_KEY</key>
+    <string>REPLACE_ME_WITH_AT_LEAST_32_CHARACTERS</string>
+    <!-- Must contain the directory holding the official claude binary. -->
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    <!-- Optional alternative to PATH: an absolute path to claude. -->
+    <!-- <key>CLAUDE_BRIDGE_CLAUDE_PATH</key><string>/opt/homebrew/bin/claude</string> -->
+    <key>CLAUDE_BRIDGE_MAX_PROCS</key>
+    <string>4</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <dict>
+    <key>SuccessfulExit</key>
+    <false/>
+  </dict>
+  <key>ProcessType</key>
+  <string>Background</string>
+
+  <key>StandardOutPath</key>
+  <string>/tmp/claude-bridge.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/claude-bridge.err.log</string>
+</dict>
+</plist>

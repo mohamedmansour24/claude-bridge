@@ -1,0 +1,30 @@
+{
+  "name": "claude-bridge",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Local OpenAI Chat Completions endpoint that satisfies Claude through the official Agent SDK spawning the official claude binary.",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "bin": {
+    "claude-bridge": "dist/server.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "start": "node dist/server.js",
+    "start:fake": "node dist/server.js --fake",
+    "smoke:real": "node scripts/smoke-real.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "0.3.241",
+    "@modelcontextprotocol/sdk": "^1.29.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.4",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
